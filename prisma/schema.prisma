@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  enterprises Enterprise[]
+  projects Project[]
+}
+
+model Enterprise {
+  id String @id @default(uuid())
+  name String
+  cnpj String @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  owner_id String
+  users User[]
+  projects Project[]
+}
+
+model Project {
+  id String @id @default(uuid())
+  name String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  enterprise Enterprise? @relation(fields: [enterprise_id], references: [id])
+  enterprise_id String?
+  users User[]
+  tasks Task[]
+}
+
+model Task {
+  id String @id @default(uuid())
+  name String
+  description String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  project Project @relation(fields: [project_id], references: [id])
+  project_id String
+  sprints Sprint[]
+}
+
+model Sprint {
+  id String @id @default(uuid())
+  time String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  task Task @relation(fields: [task_id], references: [id])
+  task_id String
+}
+
+model Mail {
+  id String @id @default(uuid())
+  subject String
+  content String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  attachments Attachment[]
+}
+
+model Attachment {
+  id String @id @default(uuid())
+  file_path String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  mail Mail @relation(fields: [mail_id], references: [id])
+  mail_id String
+}
